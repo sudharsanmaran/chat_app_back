@@ -2,40 +2,6 @@ from chat.database_utils import DatabaseUtils
 from chat.event_handlers.base_handlers import BaseEventHandler
 
 
-
-    # async def handle_group_chat(self, group_id, message):
-
-    #     group_users = await ChatConsumer.fetch_group_users(
-    #         group_id
-    #     )
-
-    #     for user in group_users:
-
-    #         await self.channel_layer.group_send(
-    #             user.username,
-    #             {
-    #                 'type': 'chat_message',
-    #                 'message': message,
-    #             }
-    #         )
-
-    # async def handle_private_message(self, recipient_id, message):
-
-    #     recipient = await ChatConsumer.fetch_user(recipient_id)
-    #     if not recipient:
-    #         await self.send("provided malformed content")
-    #         return
-
-    #     for user in (self.user, recipient):
-
-    #         await self.channel_layer.group_send(
-    #             user.username,
-    #             {
-    #                 'type': 'chat_message',
-    #                 'message': message,
-    #             }
-    #         )
-
 class MessageHandler(BaseEventHandler):
     async def create_message(self, user,  data):
         return await DatabaseUtils.create_message(
@@ -50,6 +16,7 @@ class MessageHandler(BaseEventHandler):
 
 class GroupChatHandler(MessageHandler):
     async def handle(self, consumer, data):
+        # check group_id
         message = await self.create_message(consumer.user, data)
         
         group_users = await DatabaseUtils.fetch_group_users(

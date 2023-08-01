@@ -22,6 +22,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         if (self.user):
             await self.event_handlers['initial_message'].handle(self)
+        else:
+            await self.send_error("unAuthenticated, closing the connection...")
+            return await self.close()
+            
         
 
     async def disconnect(self, close_code):
@@ -31,9 +35,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def receive(self, text_data):
-        if not self.user:
-            await self.send_error("unAuthenticated, closing the connection...")
-            return await self.close()
 
         data = json.loads(text_data)
         event_type = data.get('type')
