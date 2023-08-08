@@ -15,7 +15,7 @@ class CustomUserManager(BaseUserManager):
                 setattr(user, key, value)
             if password:
                 user.set_password(password)
-                
+
         user.save()
         return user
 
@@ -38,10 +38,11 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, unique=True,
                           default=uuid.uuid4, editable=False)
-    username = models.CharField(max_length=255, unique=True)
+    username = models.CharField(max_length=255, unique=True, db_index=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # add config dictionary as field
 
     USERNAME_FIELD = "username"
 
@@ -50,19 +51,33 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
+    @classmethod
+    def search_by_username(cls, query):
+        return cls.objects.filter(username__icontains=query)
+
 
 class ChatRoomManager(models.Manager):
-    def create_room_or_add_user(self, room_name, user):
-        try:
-            chat_room = self.get(name=room_name)
-        except ChatRoom.DoesNotExist:
-            chat_room = self.create(name=room_name)
 
-        if user not in chat_room.users.all():
-            chat_room.users.add(user)
-            chat_room.save()
+    def create_private_chat_room(self, name, users):
+        room = self.create(
+            name=name, is_private=True
+        )
+        for user in users: 
+            room.users.add(User.objects.get(pk=user.get('id')))
+        room.save()
+        return room
 
-        return chat_room
+    # def create_room_or_add_user(self, room_name, user):
+    #     try:
+    #         chat_room = self.get(name=room_name)
+    #     except ChatRoom.DoesNotExist:
+    #         chat_room = self.create(name=room_name)
+
+    #     if user not in chat_room.users.all():
+    #         chat_room.users.add(user)
+    #         chat_room.save()
+
+    #     return chat_room
 
 
 class ChatRoom(models.Model):
@@ -72,6 +87,7 @@ class ChatRoom(models.Model):
         settings.AUTH_USER_MODEL, related_name="chat_rooms")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_private = models.BooleanField(default=False)
 
     objects = ChatRoomManager()
 

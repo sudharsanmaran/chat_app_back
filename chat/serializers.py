@@ -19,13 +19,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ChatRoomSerializer(serializers.ModelSerializer):
-    users = serializers.SerializerMethodField()
+    users = UserSerializer(many=True)
     class Meta:
         model = ChatRoom
         fields = '__all__'
         
-    def get_users(self, obj):
-        return [str(uuid) for uuid in obj.users.values_list('id', flat=True)]
+    # def get_users(self, obj):
+    #     return [str(uuid) for uuid in obj.users.values_list('id', flat=True)]
 
 
 class MessageSerializer(serializers.ModelSerializer):

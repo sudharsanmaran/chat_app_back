@@ -17,6 +17,16 @@ class ListChatRoomAPIView(generics.ListAPIView):
         return ChatRoom.objects.filter(users=self.request.user)
 
 
+# @extend_schema(
+#     tags=['ChatRooms'],
+# )
+# class CRUDChatRoomAPIView(generics):
+#     permission_classes = [permissions.IsAuthenticated]
+#     serializer_class = ChatRoomSerializer
+
+#     def get_queryset(self):
+#         return ChatRoom.objects.filter(users=self.request.user)
+
 @extend_schema(
     tags=['ChatRoom\'s Messages'],
 )

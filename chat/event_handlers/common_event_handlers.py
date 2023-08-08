@@ -18,6 +18,7 @@ class InitialMessageHandler(BaseEventHandler):
                 'message': await DatabaseUtils.get_paginated_chats(consumer.user, 1, 20)
             })
         )
+        return
 
 
 class FetchGroupMessages(BaseEventHandler):
@@ -31,3 +32,27 @@ class FetchGroupMessages(BaseEventHandler):
                 },
             })
         )
+        return
+
+
+class searchUsers(BaseEventHandler):
+    async def handle(self, consumer, data):
+        await consumer.send(
+            text_data=json.dumps({
+                'type': 'search_users',
+                'message': {
+                    'result': await DatabaseUtils.search_users(data.get('search_query')),
+                },
+            })
+        )
+        return
+    
+class CreatePrivateChatRoomHandler(BaseEventHandler):
+    async def handle(self, consumer, data):
+        await consumer.send(
+            text_data=json.dumps({
+                'type': 'new_group',
+                'message':  await DatabaseUtils.create_private_chat_room(users=data.get('users')),
+            })
+        )
+        return
